@@ -10,8 +10,8 @@ from aws_organizations.better_boto.org_unit import list_parents, list_children
 bsm = BotoSesManager(profile_name="awshsh_root_us_east_1")
 # bsm = BotoSesManager(profile_name="awshsh_app_dev_us_east_1")
 
-root_id = aws_organizations.better_boto.get_root_id(bsm=bsm)
-print(f"root_id = {root_id!r}")
+# root_id = aws_organizations.better_boto.get_root_id(bsm=bsm, aws_account_id=bsm.aws_account_id)
+# print(f"root_id = {root_id!r}")
 
 # ------------------------------------------------------------------------------
 # list_children
@@ -36,19 +36,24 @@ print(f"root_id = {root_id!r}")
 # ------------------------------------------------------------------------------
 # list_organizational_units_for_parent
 # ------------------------------------------------------------------------------
-res = aws_organizations.better_boto.list_organizational_units_for_parent(
-    bsm=bsm,
-    parent_id=root_id,
-).all()
-print(f"------ organization units in {root_id!r}")
-rprint(res)
+# res = aws_organizations.better_boto.list_organizational_units_for_parent(
+#     bsm=bsm,
+#     parent_id=root_id,
+# ).all()
+# print(f"------ organization units in {root_id!r}")
+# rprint(res)
 
 # ------------------------------------------------------------------------------
 # list_accounts_for_parent
 # ------------------------------------------------------------------------------
-res = aws_organizations.better_boto.list_accounts_for_parent(
-    bsm=bsm,
-    parent_id=root_id,
-).all()
-print(f"------ accounts in {root_id!r}")
-rprint(res)
+# res = aws_organizations.better_boto.list_accounts_for_parent(
+#     bsm=bsm,
+#     parent_id=root_id,
+# ).all()
+# print(f"------ accounts in {root_id!r}")
+# rprint(res)
+
+# ------------------------------------------------------------------------------
+# get_org_structure
+# ------------------------------------------------------------------------------
+get_org_structure(bsm=bsm)

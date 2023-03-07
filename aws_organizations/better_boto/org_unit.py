@@ -2,8 +2,6 @@
 
 import typing as T
 
-import anytree
-
 from .model import (
     Parent,
     Child,
@@ -97,8 +95,11 @@ def list_children(
     )
 
 
-def get_root_id(bsm: "BotoSesManager") -> str:
-    for parent in list_parents(bsm=bsm, child_id=bsm.aws_account_id):
+def get_root_id(
+    bsm: "BotoSesManager",
+    aws_account_id: str,
+) -> str:
+    for parent in list_parents(bsm=bsm, child_id=aws_account_id):
         if parent.is_root():
             return parent.id
     raise ValueError("Could not find root id")

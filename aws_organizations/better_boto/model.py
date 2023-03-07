@@ -66,8 +66,11 @@ class Account(BaseModel):
     status: T.Optional[str] = dataclasses.field(default=None)
     joined_method: T.Optional[str] = dataclasses.field(default=None)
     joined_timestamp: T.Optional[datetime] = dataclasses.field(default=None)
+
     # relationship
-    parent: "OrganizationUnit" = dataclasses.field(default=None)
+    parent_obj: T.Union["Organization", "OrganizationUnit"] = dataclasses.field(
+        default=None
+    )
 
 
 @dataclasses.dataclass
@@ -75,10 +78,45 @@ class OrganizationUnit(BaseModel):
     id: T.Optional[str] = dataclasses.field(default=None)
     arn: T.Optional[str] = dataclasses.field(default=None)
     name: T.Optional[str] = dataclasses.field(default=None)
+
     # relationship
-    parent: "OrganizationUnit" = dataclasses.field(default=None)
+    parent_obj: T.Union["Organization", "OrganizationUnit"] = dataclasses.field(
+        default=None
+    )
+    org_units: T.List["OrganizationUnit"] = dataclasses.field(default_factory=list)
     accounts: T.List[Account] = dataclasses.field(default_factory=list)
-    children: T.List["OrganizationUnit"] = dataclasses.field(default_factory=list)
+
+    @property
+    def org_units_names(self) -> T.List[str]:
+        return [ou.name for ou in self.org_units]
+
+    @property
+    def accounts_names(self) -> T.List[str]:
+        return [account.name for account in self.accounts]
+
+
+@dataclasses.dataclass
+class Organization(BaseModel):
+    id: T.Optional[str] = dataclasses.field(default=None)
+    arn: T.Optional[str] = dataclasses.field(default=None)
+    feature_set: T.Optional[str] = dataclasses.field(default=None)
+    master_account_arn: T.Optional[str] = dataclasses.field(default=None)
+    master_account_id: T.Optional[str] = dataclasses.field(default=None)
+    master_account_email: T.Optional[str] = dataclasses.field(default=None)
+    available_policy_types: T.List[dict] = dataclasses.field(default_factory=list)
+
+    # relationship
+    parent_obj: None = dataclasses.field(default=None)
+    org_units: T.List["OrganizationUnit"] = dataclasses.field(default_factory=list)
+    accounts: T.List[Account] = dataclasses.field(default_factory=list)
+
+    @property
+    def org_units_names(self) -> T.List[str]:
+        return [ou.name for ou in self.org_units]
+
+    @property
+    def accounts_names(self) -> T.List[str]:
+        return [account.name for account in self.accounts]
 
 
 # ------------------------------------------------------------------------------

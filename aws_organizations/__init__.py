@@ -15,5 +15,8 @@ __github_username__ = "MacHu-GWU"
 
 try:
     from . import better_boto
+    from .org_struct import (
+        get_org_structure,
+    )
 except ImportError:
     pass

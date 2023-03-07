@@ -9,6 +9,7 @@ from .model import (
     AccountJoinedMethodEnum,
     Account,
     OrganizationUnit,
+    Organization,
 )
 
 from .org_unit import (
@@ -17,4 +18,8 @@ from .org_unit import (
     get_root_id,
     list_organizational_units_for_parent,
     list_accounts_for_parent,
+)
+
+from .org import (
+    describe_organization,
 )
