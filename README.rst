@@ -52,8 +52,6 @@
 Welcome to ``aws_organizations`` Documentation
 ==============================================================================
 
-Documentation for ``aws_organizations``.
-
 
 .. _install:
 

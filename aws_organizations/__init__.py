@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 
 """
-Package Description.
+AWS Organizations SDK enhancement.
 """
 
 
 from ._version import __version__
 
-__short_description__ = "Package short description."
+__short_description__ = "AWS Organizations SDK enhancement."
 __license__ = "MIT"
 __author__ = "Sanhe Hu"
 __author_email__ = "husanhe@gmail.com"
