@@ -17,6 +17,10 @@ def test():
     _ = aws_organizations.better_boto.Account
     _ = aws_organizations.better_boto.OrganizationUnit
     _ = aws_organizations.better_boto.Organization
+    _ = aws_organizations.better_boto.ParentIterproxy
+    _ = aws_organizations.better_boto.ChildIterproxy
+    _ = aws_organizations.better_boto.AccountIterproxy
+    _ = aws_organizations.better_boto.OrganizationUnitIterproxy
 
     _ = aws_organizations.better_boto.list_parents
     _ = aws_organizations.better_boto.list_children
@@ -27,6 +31,7 @@ def test():
     _ = aws_organizations.better_boto.describe_organization
 
     # high level
+    _ = aws_organizations.Node
     _ = aws_organizations.get_org_structure
 
 
