@@ -10,7 +10,7 @@ Ref:
 
 import typing as T
 
-from anytree import NodeMixin, RenderTree, AnyNode
+from anytree import NodeMixin, RenderTree
 
 # from rich import print as rprint
 
@@ -24,6 +24,10 @@ from .better_boto import (
     Account,
     OrganizationUnit,
     Organization,
+
+    AccountIterproxy,
+    OrganizationUnitIterproxy,
+
     list_parents,
     list_children,
     get_root_id,
@@ -65,6 +69,23 @@ class Node(NodeMixin):
     def __repr__(self) -> str:
         return f"{self.name} ({self.type})"
 
+    def _iter_accounts(self) -> T.Iterable[Account]:
+        node: Node
+        for _, _, node in RenderTree(self):
+            if node.obj.is_account():
+                yield node.obj
+
+    def iter_accounts(self) -> AccountIterproxy:
+        return AccountIterproxy(self._iter_accounts())
+
+    def _iter_org_units(self) -> T.Iterable[Account]:
+        node: Node
+        for _, _, node in RenderTree(self):
+            if node.obj.is_ou():
+                yield node.obj
+
+    def iter_org_units(self) -> OrganizationUnitIterproxy:
+        return OrganizationUnitIterproxy(self._iter_org_units())
 
 def get_org_structure(bsm: "BotoSesManager") -> Node:
     """

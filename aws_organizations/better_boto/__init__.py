@@ -10,6 +10,11 @@ from .model import (
     Account,
     OrganizationUnit,
     Organization,
+
+    ParentIterproxy,
+    ChildIterproxy,
+    AccountIterproxy,
+    OrganizationUnitIterproxy,
 )
 
 from .org_unit import (

@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 
 from boto_session_manager import BotoSesManager
+from anytree import RenderTree
 from rich import print as rprint
 
 import aws_organizations
-from aws_organizations.org_struct import get_org_structure
+from aws_organizations.org_struct import Node, get_org_structure
 from aws_organizations.better_boto.org_unit import list_parents, list_children
 
 bsm = BotoSesManager(profile_name="awshsh_root_us_east_1")
@@ -56,4 +57,10 @@ bsm = BotoSesManager(profile_name="awshsh_root_us_east_1")
 # ------------------------------------------------------------------------------
 # get_org_structure
 # ------------------------------------------------------------------------------
-get_org_structure(bsm=bsm)
+root = get_org_structure(bsm=bsm)
+
+# for ou in root.iter_org_units():
+#     print(ou.name)
+
+# for acc in root.iter_accounts():
+#     print(acc.name)

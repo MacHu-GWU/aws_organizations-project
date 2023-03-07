@@ -46,6 +46,17 @@ class Child(BaseModel):
         return self.type == ChildTypeEnum.ORGANIZATIONAL_UNIT.value
 
 
+class AccountOrOrgUnitOrOrg:
+    def is_account(self) -> bool:
+        return False
+
+    def is_ou(self) -> bool:
+        return False
+
+    def is_org(self) -> bool:
+        return False
+
+
 class AccountStatusEnum(str, enum.Enum):
     ACTIVE = "ACTIVE"
     SUSPENDED = "SUSPENDED"
@@ -58,7 +69,10 @@ class AccountJoinedMethodEnum(str, enum.Enum):
 
 
 @dataclasses.dataclass
-class Account(BaseModel):
+class Account(
+    BaseModel,
+    AccountOrOrgUnitOrOrg,
+):
     id: T.Optional[str] = dataclasses.field(default=None)
     arn: T.Optional[str] = dataclasses.field(default=None)
     name: T.Optional[str] = dataclasses.field(default=None)
@@ -72,9 +86,15 @@ class Account(BaseModel):
         default=None
     )
 
+    def is_account(self) -> bool:
+        return True
+
 
 @dataclasses.dataclass
-class OrganizationUnit(BaseModel):
+class OrganizationUnit(
+    BaseModel,
+    AccountOrOrgUnitOrOrg,
+):
     id: T.Optional[str] = dataclasses.field(default=None)
     arn: T.Optional[str] = dataclasses.field(default=None)
     name: T.Optional[str] = dataclasses.field(default=None)
@@ -86,6 +106,9 @@ class OrganizationUnit(BaseModel):
     org_units: T.List["OrganizationUnit"] = dataclasses.field(default_factory=list)
     accounts: T.List[Account] = dataclasses.field(default_factory=list)
 
+    def is_ou(self) -> bool:
+        return True
+
     @property
     def org_units_names(self) -> T.List[str]:
         return [ou.name for ou in self.org_units]
@@ -96,7 +119,10 @@ class OrganizationUnit(BaseModel):
 
 
 @dataclasses.dataclass
-class Organization(BaseModel):
+class Organization(
+    BaseModel,
+    AccountOrOrgUnitOrOrg,
+):
     id: T.Optional[str] = dataclasses.field(default=None)
     arn: T.Optional[str] = dataclasses.field(default=None)
     feature_set: T.Optional[str] = dataclasses.field(default=None)
@@ -109,6 +135,13 @@ class Organization(BaseModel):
     parent_obj: None = dataclasses.field(default=None)
     org_units: T.List["OrganizationUnit"] = dataclasses.field(default_factory=list)
     accounts: T.List[Account] = dataclasses.field(default_factory=list)
+
+    @property
+    def name(self) -> str:
+        return f"Organization({self.id})"
+
+    def is_org(self) -> bool:
+        return True
 
     @property
     def org_units_names(self) -> T.List[str]:
