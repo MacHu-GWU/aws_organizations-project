@@ -15,6 +15,13 @@ Backlog (TODO)
 **Miscellaneous**
 
 
+0.2.1 (TODO)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+**Features and Improvements**
+
+- add ``Node.iter_org_units`` and ``Node_iter_accounts`` methods.
+
+
 0.1.1 (2023-03-06)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 **Features and Improvements**
