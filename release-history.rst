@@ -4,7 +4,7 @@ Release and Version History
 ==============================================================================
 
 
-0.0.3 (TODO)
+Backlog (TODO)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 **Features and Improvements**
 
@@ -15,18 +15,10 @@ Release and Version History
 **Miscellaneous**
 
 
-0.0.2 (TODO)
+0.1.1 (2023-03-06)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 **Features and Improvements**
-
-**Minor Improvements**
-
-**Bugfixes**
-
-**Miscellaneous**
-
-
-0.0.1 (2023-03-06)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 - First release
+- add data model for ``Organization``, ``OrganizationUnit``, ``Account``
+- add ``get_org_structure`` method to get the organization structure tree.
