@@ -69,6 +69,13 @@ class Node(NodeMixin):
     def __repr__(self) -> str:
         return f"{self.name} ({self.type} {self.id!r})"
 
+    @property
+    def path_key(self) -> str:
+        return " | ".join([
+            node.name
+            for node in self.path
+        ])
+
     def _iter_accounts(self, recursive: bool = True) -> T.Iterable[Account]:
         node: Node
         if recursive:
@@ -113,7 +120,6 @@ class OrgStructure:
     - ``for acc in self.root.iter_org_accounts(recursive=True):`` can iterate all Accounts.
     - ``self.is_x_in_y()`` can test if an account / ou is in an ou or org.
     """
-
     root: Node = dataclasses.field()
 
     _mapper: T.Dict[str, Node] = dataclasses.field(init=False, default_factory=dict)
@@ -130,6 +136,24 @@ class OrgStructure:
         Visualize (print) the organization structure tree.
         """
         print(RenderTree(self.root))
+
+    def to_csv(self, sep="\t") -> str:
+        rows = [
+            ("Type", "Path", "Id")
+        ]
+        node: Node
+        for pre, fill, node in RenderTree(self.root):
+            rows.append(
+                (
+                    node.type,
+                    node.path_key,
+                    node.id,
+                )
+            )
+        return "\n".join([
+            sep.join(row)
+            for row in rows
+        ])
 
     def get_node(self, id: str) -> Node:
         """

@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+from pathlib import Path
 from boto_session_manager import BotoSesManager
 from anytree import RenderTree
 from rich import print as rprint
@@ -58,7 +59,10 @@ bsm = BotoSesManager(profile_name="awshsh_root_us_east_1")
 # get_org_structure
 # ------------------------------------------------------------------------------
 org_struct = OrgStructure.get_org_structure(bsm=bsm)
-org_struct.visualize()
+# org_struct.visualize()
+csv = org_struct.to_csv()
+Path("org_struct.csv").write_text(csv)
+
 
 # print(org_struct.is_x_in_y("393783141457", "r-rkp6"))
 # print(org_struct.is_x_in_y("393783141457", org_struct.get_node("r-rkp6")))
