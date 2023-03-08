@@ -1,5 +1,9 @@
 # -*- coding: utf-8 -*-
 
+"""
+Organization related boto3 API enhancement.
+"""
+
 import typing as T
 
 from .model import (
