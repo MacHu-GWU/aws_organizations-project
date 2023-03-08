@@ -1,11 +1,15 @@
 # -*- coding: utf-8 -*-
 
+"""
+Organizational unit related boto3 API enhancement.
+"""
+
 import typing as T
 
 from .model import (
     Parent,
     Child,
-    OrganizationUnit,
+    OrganizationalUnit,
     Account,
     ParentIterproxy,
     ChildIterproxy,
@@ -110,7 +114,7 @@ def _list_organizational_units_for_parent(
     parent_id: str,
     page_size: int = 20,
     max_results: int = 1000,
-) -> T.Iterator[OrganizationUnit]:
+) -> T.Iterator[OrganizationalUnit]:
     paginator = bsm.organizations_client.get_paginator(
         "list_organizational_units_for_parent"
     )
@@ -122,7 +126,7 @@ def _list_organizational_units_for_parent(
         ),
     ):
         for dct in response.get("OrganizationalUnits", []):
-            yield OrganizationUnit(
+            yield OrganizationalUnit(
                 id=dct["Id"],
                 arn=dct["Arn"],
                 name=dct["Name"],
