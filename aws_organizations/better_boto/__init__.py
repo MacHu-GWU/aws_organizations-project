@@ -8,7 +8,7 @@ from .model import (
     AccountStatusEnum,
     AccountJoinedMethodEnum,
     Account,
-    OrganizationUnit,
+    OrganizationalUnit,
     Organization,
 
     ParentIterproxy,
