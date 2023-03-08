@@ -5,7 +5,7 @@ from anytree import RenderTree
 from rich import print as rprint
 
 import aws_organizations
-from aws_organizations.org_struct import Node, get_org_structure
+from aws_organizations.org_struct import OrgStructure
 from aws_organizations.better_boto.org_unit import list_parents, list_children
 
 bsm = BotoSesManager(profile_name="awshsh_root_us_east_1")
@@ -57,10 +57,22 @@ bsm = BotoSesManager(profile_name="awshsh_root_us_east_1")
 # ------------------------------------------------------------------------------
 # get_org_structure
 # ------------------------------------------------------------------------------
-root = get_org_structure(bsm=bsm)
+org_struct = OrgStructure.get_org_structure(bsm=bsm)
+org_struct.visualize()
 
-# for ou in root.iter_org_units():
-#     print(ou.name)
+# print(org_struct.is_x_in_y("393783141457", "r-rkp6"))
+# print(org_struct.is_x_in_y("393783141457", org_struct.get_node("r-rkp6")))
+# print(org_struct.is_x_in_y("393783141457", org_struct.get_node("r-rkp6").obj))
+#
+# print(org_struct.is_x_in_y("393783141457", "r-rkp6"))
+# print(org_struct.is_x_in_y(org_struct.get_node("393783141457"), org_struct.get_node("r-rkp6")))
+# print(org_struct.is_x_in_y(org_struct.get_node("393783141457").obj, org_struct.get_node("r-rkp6").obj))
 
-# for acc in root.iter_accounts():
-#     print(acc.name)
+# print(org_struct.is_x_in_y("393783141457", "ou-rkp6-cxgi4leg"))
+# print(org_struct.is_x_in_y("393783141457", "ou-rkp6-vq6m3h5y"))
+
+# for ou in org_struct.root.iter_org_units():
+#     print(org_struct.get_node(ou.id))
+
+# for acc in org_struct.root.iter_accounts():
+#     print(org_struct.get_node(acc.id))
