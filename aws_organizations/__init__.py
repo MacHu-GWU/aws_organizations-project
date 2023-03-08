@@ -17,7 +17,7 @@ try:
     from . import better_boto
     from .org_struct import (
         Node,
-        get_org_structure,
+        OrgStructure,
     )
 except ImportError:
     pass
