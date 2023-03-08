@@ -1,5 +1,9 @@
 # -*- coding: utf-8 -*-
 
+"""
+AWS Organizations related data model.
+"""
+
 import typing as T
 import enum
 import dataclasses
@@ -47,6 +51,12 @@ class Child(BaseModel):
 
 
 class AccountOrOrgUnitOrOrg:
+    """
+    Mixin class for Account, OrganizationUnit and Organization.
+
+    They all have three common testing methods
+    ``is_account()``, ``is_ou()``, and ``is_org()``.
+    """
     def is_account(self) -> bool:
         return False
 
@@ -73,6 +83,9 @@ class Account(
     BaseModel,
     AccountOrOrgUnitOrOrg,
 ):
+    """
+    Represents an AWS Account.
+    """
     id: T.Optional[str] = dataclasses.field(default=None)
     arn: T.Optional[str] = dataclasses.field(default=None)
     name: T.Optional[str] = dataclasses.field(default=None)
@@ -82,7 +95,7 @@ class Account(
     joined_timestamp: T.Optional[datetime] = dataclasses.field(default=None)
 
     # relationship
-    parent_obj: T.Union["Organization", "OrganizationUnit"] = dataclasses.field(
+    parent_obj: T.Union["Organization", "OrganizationalUnit"] = dataclasses.field(
         default=None
     )
 
@@ -91,19 +104,22 @@ class Account(
 
 
 @dataclasses.dataclass
-class OrganizationUnit(
+class OrganizationalUnit(
     BaseModel,
     AccountOrOrgUnitOrOrg,
 ):
+    """
+    Represents an AWS Organization Unit.
+    """
     id: T.Optional[str] = dataclasses.field(default=None)
     arn: T.Optional[str] = dataclasses.field(default=None)
     name: T.Optional[str] = dataclasses.field(default=None)
 
     # relationship
-    parent_obj: T.Union["Organization", "OrganizationUnit"] = dataclasses.field(
+    parent_obj: T.Union["Organization", "OrganizationalUnit"] = dataclasses.field(
         default=None
     )
-    org_units: T.List["OrganizationUnit"] = dataclasses.field(default_factory=list)
+    org_units: T.List["OrganizationalUnit"] = dataclasses.field(default_factory=list)
     accounts: T.List[Account] = dataclasses.field(default_factory=list)
 
     def is_ou(self) -> bool:
@@ -123,6 +139,9 @@ class Organization(
     BaseModel,
     AccountOrOrgUnitOrOrg,
 ):
+    """
+    Represents an AWS Organization.
+    """
     id: T.Optional[str] = dataclasses.field(default=None)
     arn: T.Optional[str] = dataclasses.field(default=None)
     feature_set: T.Optional[str] = dataclasses.field(default=None)
@@ -133,7 +152,7 @@ class Organization(
 
     # relationship
     parent_obj: None = dataclasses.field(default=None)
-    org_units: T.List["OrganizationUnit"] = dataclasses.field(default_factory=list)
+    org_units: T.List["OrganizationalUnit"] = dataclasses.field(default_factory=list)
     accounts: T.List[Account] = dataclasses.field(default_factory=list)
 
     @property
@@ -167,5 +186,5 @@ class AccountIterproxy(IterProxy[Account]):
     pass
 
 
-class OrganizationUnitIterproxy(IterProxy[OrganizationUnit]):
+class OrganizationUnitIterproxy(IterProxy[OrganizationalUnit]):
     pass
