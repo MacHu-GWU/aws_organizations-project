@@ -10,10 +10,10 @@ from aws_organizations.org_struct import (
     OrgStructure,
 )
 from rich import print as rprint
+
 IS_CI = "CI" in os.environ
 
 
-@pytest.mark.skipif(IS_CI, reason="This test is not meant to run in CI")
 def _run_test_case(org_struct: OrgStructure):
     # --------------------------------------------------------------------------
     # Root node
@@ -124,6 +124,7 @@ def _run_better_boto(org_struct: OrgStructure, bsm: BotoSesManager):
     rprint(res)
 
 
+@pytest.mark.skipif(IS_CI, reason="This test is not meant to run in CI")
 def test():
     print("")
     bsm = BotoSesManager(profile_name="awshsh_infra_us_east_1")

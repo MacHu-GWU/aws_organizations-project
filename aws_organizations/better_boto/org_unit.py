@@ -17,7 +17,7 @@ from .model import (
     AccountIterproxy,
 )
 
-if T.TYPE_CHECKING: # pragma: no cover
+if T.TYPE_CHECKING:  # pragma: no cover
     from boto_session_manager import BotoSesManager
 
 
@@ -158,9 +158,7 @@ def _list_accounts_for_parent(
     page_size: int = 20,
     max_results: int = 1000,
 ) -> T.Iterator[Account]:
-    paginator = bsm.organizations_client.get_paginator(
-        "list_accounts_for_parent"
-    )
+    paginator = bsm.organizations_client.get_paginator("list_accounts_for_parent")
     for response in paginator.paginate(
         ParentId=parent_id,
         PaginationConfig=dict(
