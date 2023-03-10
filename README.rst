@@ -51,6 +51,9 @@
 
 Welcome to ``aws_organizations`` Documentation
 ==============================================================================
+AWS Organizations SDK enhancement.
+
+See 📔 `usage example <https://github.com/MacHu-GWU/aws_organizations-project/blob/main/examples/example.ipynb>`_.
 
 
 .. _install:
