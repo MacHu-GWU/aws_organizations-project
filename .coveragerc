@@ -3,11 +3,9 @@
 [run]
 omit =
     aws_organizations/_version.py
-    aws_organizations/cli.py
-    aws_organizations/pkg/*
     aws_organizations/docs/*
     aws_organizations/tests/*
-    aws_organizations/handlers/*
+    aws_organizations/compat.py
 
 [report]
 # Regexes for lines to exclude from consideration
