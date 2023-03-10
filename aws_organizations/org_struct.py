@@ -12,6 +12,7 @@ import typing as T
 import enum
 import dataclasses
 
+from iterproxy import IterProxy
 from anytree import NodeMixin, RenderTree
 
 from .better_boto import (
@@ -88,11 +89,13 @@ class Node(NodeMixin):
     def _iter_accounts(self, recursive: bool = True) -> T.Iterable[Account]:
         node: Node
         if recursive:
-            for _, _, node in RenderTree(self):
+            iterproxy = IterProxy(RenderTree(self))
+            iterproxy.skip(1)
+            for _, _, node in iterproxy:
                 if node.obj.is_account():
                     yield node.obj
         else:
-            for node in self.root.children:
+            for node in self.children:
                 if node.obj.is_account():
                     yield node.obj
 
@@ -102,11 +105,13 @@ class Node(NodeMixin):
     def _iter_org_units(self, recursive: bool = True) -> T.Iterable[Account]:
         node: Node
         if recursive:
-            for _, _, node in RenderTree(self):
+            iterproxy = IterProxy(RenderTree(self))
+            iterproxy.skip(1)
+            for _, _, node in iterproxy:
                 if node.obj.is_ou():
                     yield node.obj
         else:
-            for node in self.root.children:
+            for node in self.children:
                 if node.obj.is_ou():
                     yield node.obj
 

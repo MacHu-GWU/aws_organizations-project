@@ -32,6 +32,7 @@ def _run_test_case(org_struct: OrgStructure):
     # --------------------------------------------------------------------------
     # Iterate account, ou
     # --------------------------------------------------------------------------
+    # root account
     assert len(root.accounts) == 1
     assert root.accounts[0].name == "awshsh-root"
 
@@ -42,6 +43,13 @@ def _run_test_case(org_struct: OrgStructure):
     assert len(root.org_units) == len(root.org_units_names)
     assert len(root.all_accounts) == len(root.all_accounts_names)
     assert len(root.all_org_units) == len(root.all_org_units_names)
+
+    # ML ou
+    ou_ml = org_struct.get_node_by_name("ml")
+    assert len(ou_ml.accounts) == 3
+    assert len(ou_ml.org_units) == 0
+    assert len(ou_ml.all_accounts) == 3
+    assert len(ou_ml.all_org_units) == 0
 
     # --------------------------------------------------------------------------
     # is X in Y
