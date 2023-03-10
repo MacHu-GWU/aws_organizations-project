@@ -17,7 +17,7 @@ from .model import (
     AccountIterproxy,
 )
 
-if T.TYPE_CHECKING:
+if T.TYPE_CHECKING: # pragma: no cover
     from boto_session_manager import BotoSesManager
 
 
@@ -103,6 +103,9 @@ def get_root_id(
     bsm: "BotoSesManager",
     aws_account_id: str,
 ) -> str:
+    """
+    Recursively going up to find the AWS Organizations root id.
+    """
     for parent in list_parents(bsm=bsm, child_id=aws_account_id):
         if parent.is_root():
             return parent.id

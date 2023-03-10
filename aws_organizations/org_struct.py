@@ -8,35 +8,34 @@ Ref:
 - Core concepts: https://docs.aws.amazon.com/whitepapers/latest/organizing-your-aws-environment/core-concepts.html
 """
 
-import dataclasses
 import typing as T
+import enum
+import dataclasses
 
 from anytree import NodeMixin, RenderTree
 
-# from rich import print as rprint
-
 from .better_boto import (
-    ParentTypeEnum,
-    Parent,
-    ChildTypeEnum,
-    Child,
-    AccountStatusEnum,
-    AccountJoinedMethodEnum,
     Account,
     OrganizationalUnit,
     Organization,
     AccountIterproxy,
     OrganizationUnitIterproxy,
-    list_parents,
-    list_children,
     get_root_id,
     list_organizational_units_for_parent,
     list_accounts_for_parent,
     describe_organization,
 )
 
-if T.TYPE_CHECKING:
+if T.TYPE_CHECKING:  # pragma: no cover
     from boto_session_manager import BotoSesManager
+
+ROOT_NODE_NAME = "root"
+
+
+class NodeTypeEnum(str, enum.Enum):
+    ROOT = "Root"
+    ORG_UNIT = "OrgUnit"
+    ACCOUNT = "Account"
 
 
 class Node(NodeMixin):
@@ -63,18 +62,28 @@ class Node(NodeMixin):
         self.type = type
         self.obj = obj
         self.parent = parent
-        if children:
+        if children:  # pragma: no cover
             self.children = children
+
+    @property
+    def organization_or_account_or_organizational_unit(
+        self,
+    ) -> T.Union[Organization, OrganizationalUnit, Account]:  # pragma: no cover
+        return self.obj
+
+    @property
+    def parent_id(self) -> T.Optional[str]:
+        if self.parent is None:
+            return None
+        else:
+            return self.parent.id
 
     def __repr__(self) -> str:
         return f"{self.name} ({self.type} {self.id!r})"
 
     @property
     def path_key(self) -> str:
-        return " | ".join([
-            node.name
-            for node in self.path
-        ])
+        return " | ".join([node.name for node in self.path])
 
     def _iter_accounts(self, recursive: bool = True) -> T.Iterable[Account]:
         node: Node
@@ -104,6 +113,38 @@ class Node(NodeMixin):
     def iter_org_units(self, recursive: bool = True) -> OrganizationUnitIterproxy:
         return OrganizationUnitIterproxy(self._iter_org_units(recursive=recursive))
 
+    @property
+    def accounts(self) -> T.List[Account]:
+        return self.iter_accounts(recursive=False).all()
+
+    @property
+    def org_units(self) -> T.List[OrganizationalUnit]:
+        return self.iter_org_units(recursive=False).all()
+
+    @property
+    def all_accounts(self) -> T.List[Account]:
+        return self.iter_accounts(recursive=True).all()
+
+    @property
+    def all_org_units(self) -> T.List[OrganizationalUnit]:
+        return self.iter_org_units(recursive=True).all()
+
+    @property
+    def accounts_names(self) -> T.List[str]:
+        return [account.name for account in self.accounts]
+
+    @property
+    def org_units_names(self) -> T.List[str]:
+        return [ou.name for ou in self.org_units]
+
+    @property
+    def all_accounts_names(self) -> T.List[str]:
+        return [account.name for account in self.all_accounts]
+
+    @property
+    def all_org_units_names(self) -> T.List[str]:
+        return [ou.name for ou in self.all_org_units]
+
 
 @dataclasses.dataclass
 class OrgStructure:
@@ -119,28 +160,67 @@ class OrgStructure:
     - ``for ou in self.root.iter_org_units(recursive=True):`` can iterate all OU.
     - ``for acc in self.root.iter_org_accounts(recursive=True):`` can iterate all Accounts.
     - ``self.is_x_in_y()`` can test if an account / ou is in an ou or org.
+
+    Example:
+
+        >>> from boto_session_manager import BotoSesManager
+        >>> bsm = BotoSesManager() # or BotoSesManager(profile_name="my-profile")
+        >>> org_struct = OrgStructure.get_org_structure(bsm)
+        >>> org_struct.visualize()
+        Root (ROOT 'r-hnp9')
+        ├── app (Org Unit 'ou-hnp9-vq6m3h5y')
+        │   └── myorg-app-dev (Account '222222222222')
+        ├── infra (Org Unit 'ou-hnp9-cxgi4leg')
+        │   └── myorg-infra (Account '333333333333')
+        ├── sandbox (Org Unit 'ou-hnp9-r7cuoq1v')
+        ├── ml (Org Unit 'ou-hnp9-s4uirmja')
+        │   ├── myorg-ml-dev (Account '444444444444')
+        │   ├── myorg-ml-staging (Account '555555555555')
+        │   └── myorg-ml-prod (Account '666666666666')
+        └── awshsh-root (Account '111111111111')
+
+        >>> org_struct.root.organization_or_account_or_organizational_unit
+        Organization(id='o-a1b2c3d4', arn='arn:aws:organizations::111122223333:organization/o-a1b2c3d4')
+        >>> org_struct.root.accounts
+        ...
+        >>> org_struct.root.org_units
+        ...
+        >>> org_struct.root.all_accounts
+        ...
+        >>> org_struct.root.all_org_units
+        ...
     """
+
     root: Node = dataclasses.field()
 
-    _mapper: T.Dict[str, Node] = dataclasses.field(init=False, default_factory=dict)
+    _id_to_node: T.Dict[str, Node] = dataclasses.field(init=False, default_factory=dict)
+    _name_to_node: T.Dict[str, Node] = dataclasses.field(
+        init=False, default_factory=dict
+    )
 
     def __post_init__(self):
-        self._mapper[self.root.id] = self.root
-        self._mapper[self.root.obj.id] = self.root
+        self._id_to_node[self.root_id] = self.root
+        self._id_to_node[self.root.obj.id] = self.root
+
         node: Node
         for _, _, node in RenderTree(self.root):
-            self._mapper[node.id] = node
+            self._id_to_node[node.id] = node
+            self._name_to_node[node.name] = node
 
-    def visualize(self):
+    @property
+    def root_id(self) -> str:
+        return self.root.obj.root_id
+
+    def visualize(self) -> str:
         """
-        Visualize (print) the organization structure tree.
+        Visualize the organization structure tree. It returns a string that
+        can be printed.
         """
-        print(RenderTree(self.root))
+        return str(RenderTree(self.root))
 
     def to_csv(self, sep="\t") -> str:
-        rows = [
-            ("Type", "Path", "Id")
-        ]
+        """ """
+        rows = [("Type", "Path", "Id", "ParentId", "RootId")]
         node: Node
         for pre, fill, node in RenderTree(self.root):
             rows.append(
@@ -148,18 +228,23 @@ class OrgStructure:
                     node.type,
                     node.path_key,
                     node.id,
+                    str(node.parent_id),
+                    node.obj.root_id,
                 )
             )
-        return "\n".join([
-            sep.join(row)
-            for row in rows
-        ])
+        return "\n".join([sep.join(row) for row in rows])
 
-    def get_node(self, id: str) -> Node:
+    def get_node_by_id(self, id: str) -> Node:
         """
         Get a node by id.
         """
-        return self._mapper[id]
+        return self._id_to_node[id]
+
+    def get_node_by_name(self, name: str) -> Node:
+        """
+        Get a node by name.
+        """
+        return self._name_to_node[name]
 
     def _resolve_node(
         self,
@@ -168,11 +253,11 @@ class OrgStructure:
         ],
     ) -> Node:
         if isinstance(node_or_object_or_id, str):
-            return self._mapper[node_or_object_or_id]
+            return self._id_to_node[node_or_object_or_id]
         elif isinstance(node_or_object_or_id, Node):
             return node_or_object_or_id
         else:
-            return self._mapper[node_or_object_or_id.id]
+            return self._id_to_node[node_or_object_or_id.id]
 
     def _is_x_in_y(
         self,
@@ -200,55 +285,104 @@ class OrgStructure:
         """
         Get the root node of the organization structure tree.
 
-        :param bsm: the boto session manager of the management AWS Account (Root)
-            of this organization.
+        :param bsm: the boto session manager of any AWS Account that is in
+            the desired organization, doesn't have to be the management
+            AWS Account (Root).
         """
         org = describe_organization(bsm=bsm)
 
-        root_id = get_root_id(bsm=bsm, aws_account_id=bsm.aws_account_id)
+        root_id = get_root_id(bsm=bsm, aws_account_id=org.master_account_id)
+        org.root_id = root_id
 
-        ROOT = Node(id=root_id, name="Root", type="ROOT", obj=org)
+        root_node = Node(
+            id=org.id,
+            name=ROOT_NODE_NAME,
+            type=NodeTypeEnum.ROOT.value,
+            obj=org,
+        )
 
-        def walk_through(root: Node):
+        def walk_through(node: Node):
             """
             depth first search to walk through the organization structure tree or
             organization unit.
             """
-            for ou in list_organizational_units_for_parent(bsm=bsm, parent_id=root.id):
-                ou.parent_obj = root.obj
-                root.obj.org_units.append(ou)
+            if node.obj.is_org():
+                parent_id = node.obj.root_id
+            elif node.obj.is_ou():
+                parent_id = node.obj.id
+            else:  # pragma: no cover
+                raise NotImplementedError
+
+            for ou in list_organizational_units_for_parent(
+                bsm=bsm, parent_id=parent_id
+            ):
+                ou.root_id = root_id
                 leaf = Node(
                     id=ou.id,
                     name=ou.name,
-                    type="Org Unit",
+                    type=NodeTypeEnum.ORG_UNIT.value,
                     obj=ou,
-                    parent=root,
+                    parent=node,
                 )
                 walk_through(leaf)
 
-            for account in list_accounts_for_parent(bsm=bsm, parent_id=root.id):
-                account.parent_obj = root.obj
-                root.obj.accounts.append(account)
+            for account in list_accounts_for_parent(bsm=bsm, parent_id=parent_id):
+                account.root_id = root_id
                 leaf = Node(
                     id=account.id,
                     name=account.name,
-                    type="Account",
+                    type=NodeTypeEnum.ACCOUNT.value,
                     obj=account,
-                    parent=root,
+                    parent=node,
                 )
 
-        walk_through(ROOT)
+        walk_through(root_node)
 
-        # print(RenderTree(ROOT))
+        return OrgStructure(root=root_node)
 
-        # rprint(ROOT.obj.parent_obj)
-        # rprint(ROOT.obj.org_units_names)
-        # rprint(ROOT.obj.accounts_names)
+    def serialize(self) -> dict:
+        entities: T.List[dict] = list()
+        node: Node
+        for pre, fill, node in RenderTree(self.root):
+            # print(node.id, node.name, node.organization_or_account_or_organizational_unit, node.parent)
+            entity = dict(
+                id=node.id,
+                name=node.name,
+                type=node.type,
+                obj=node.obj.to_dict(),
+                parent_id=node.parent.id if node.parent else None,
+            )
+            entities.append(entity)
+        return dict(entities=entities)
 
-        # rprint(ROOT.obj.org_units[0].name)
-        # rprint(ROOT.obj.org_units[0].org_units_names)
-        # rprint(ROOT.obj.org_units[0].accounts_names)
+    @classmethod
+    def deserialize(cls, data: dict) -> "OrgStructure":
+        node_mapper = {}
+        type_to_object = {
+            NodeTypeEnum.ACCOUNT.value: Account,
+            NodeTypeEnum.ORG_UNIT.value: OrganizationalUnit,
+            NodeTypeEnum.ROOT.value: Organization,
+        }
+        root: T.Optional[Node] = None
+        for entity in data["entities"]:
+            entity_object = type_to_object[entity["type"]].from_dict(entity["obj"])
+            node = Node(
+                id=entity["id"],
+                name=entity["name"],
+                type=entity["type"],
+                obj=entity_object,
+            )
+            node_mapper[entity["id"]] = node
+            if entity["type"] == NodeTypeEnum.ROOT.value:
+                root = node
+        if root is None:  # pragma: no cover
+            raise ValueError("No root node found in the data.")
 
-        # rprint(ROOT.obj.org_units[0].parent_obj.arn)
+        for entity in data["entities"]:
+            node = node_mapper[entity["id"]]
+            parent_id = entity["parent_id"]
+            if parent_id is not None:
+                parent_node = node_mapper[parent_id]
+                node.parent = parent_node
 
-        return OrgStructure(root=ROOT)
+        return OrgStructure(root=root)

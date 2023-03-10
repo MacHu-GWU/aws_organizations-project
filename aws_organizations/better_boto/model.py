@@ -12,8 +12,14 @@ from datetime import datetime
 from iterproxy import IterProxy
 
 
+@dataclasses.dataclass
 class BaseModel:
-    pass
+    def to_dict(self) -> dict:
+        return dataclasses.asdict(self)
+
+    @classmethod
+    def from_dict(cls, data: dict):
+        return cls(**data)
 
 
 class ParentTypeEnum(str, enum.Enum):
@@ -94,10 +100,7 @@ class Account(
     joined_method: T.Optional[str] = dataclasses.field(default=None)
     joined_timestamp: T.Optional[datetime] = dataclasses.field(default=None)
 
-    # relationship
-    parent_obj: T.Union["Organization", "OrganizationalUnit"] = dataclasses.field(
-        default=None
-    )
+    root_id: T.Optional[str] = dataclasses.field(default=None)
 
     def is_account(self) -> bool:
         return True
@@ -115,23 +118,10 @@ class OrganizationalUnit(
     arn: T.Optional[str] = dataclasses.field(default=None)
     name: T.Optional[str] = dataclasses.field(default=None)
 
-    # relationship
-    parent_obj: T.Union["Organization", "OrganizationalUnit"] = dataclasses.field(
-        default=None
-    )
-    org_units: T.List["OrganizationalUnit"] = dataclasses.field(default_factory=list)
-    accounts: T.List[Account] = dataclasses.field(default_factory=list)
+    root_id: T.Optional[str] = dataclasses.field(default=None)
 
     def is_ou(self) -> bool:
         return True
-
-    @property
-    def org_units_names(self) -> T.List[str]:
-        return [ou.name for ou in self.org_units]
-
-    @property
-    def accounts_names(self) -> T.List[str]:
-        return [account.name for account in self.accounts]
 
 
 @dataclasses.dataclass
@@ -150,10 +140,7 @@ class Organization(
     master_account_email: T.Optional[str] = dataclasses.field(default=None)
     available_policy_types: T.List[dict] = dataclasses.field(default_factory=list)
 
-    # relationship
-    parent_obj: None = dataclasses.field(default=None)
-    org_units: T.List["OrganizationalUnit"] = dataclasses.field(default_factory=list)
-    accounts: T.List[Account] = dataclasses.field(default_factory=list)
+    root_id: T.Optional[str] = dataclasses.field(default=None)
 
     @property
     def name(self) -> str:
@@ -161,14 +148,6 @@ class Organization(
 
     def is_org(self) -> bool:
         return True
-
-    @property
-    def org_units_names(self) -> T.List[str]:
-        return [ou.name for ou in self.org_units]
-
-    @property
-    def accounts_names(self) -> T.List[str]:
-        return [account.name for account in self.accounts]
 
 
 # ------------------------------------------------------------------------------
