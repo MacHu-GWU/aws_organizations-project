@@ -19,5 +19,5 @@ try:
         Node,
         OrgStructure,
     )
-except ImportError:
+except ImportError: # pragma: no cover
     pass

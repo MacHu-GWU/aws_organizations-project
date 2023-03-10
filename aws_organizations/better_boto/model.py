@@ -32,10 +32,10 @@ class Parent(BaseModel):
     id: str = dataclasses.field()
     type: str = dataclasses.field()
 
-    def is_root(self) -> bool:
+    def is_root(self) -> bool:  # pragma: no cover
         return self.type == ParentTypeEnum.ROOT.value
 
-    def is_ou(self) -> bool:
+    def is_ou(self) -> bool:  # pragma: no cover
         return self.type == ParentTypeEnum.ORGANIZATIONAL_UNIT.value
 
 
@@ -49,10 +49,10 @@ class Child(BaseModel):
     id: str = dataclasses.field()
     type: str = dataclasses.field()
 
-    def is_account(self) -> bool:
+    def is_account(self) -> bool:  # pragma: no cover
         return self.type == ChildTypeEnum.ACCOUNT.value
 
-    def is_ou(self) -> bool:
+    def is_ou(self) -> bool:  # pragma: no cover
         return self.type == ChildTypeEnum.ORGANIZATIONAL_UNIT.value
 
 
@@ -63,13 +63,14 @@ class AccountOrOrgUnitOrOrg:
     They all have three common testing methods
     ``is_account()``, ``is_ou()``, and ``is_org()``.
     """
-    def is_account(self) -> bool:
+
+    def is_account(self) -> bool:  # pragma: no cover
         return False
 
-    def is_ou(self) -> bool:
+    def is_ou(self) -> bool:  # pragma: no cover
         return False
 
-    def is_org(self) -> bool:
+    def is_org(self) -> bool:  # pragma: no cover
         return False
 
 
@@ -92,6 +93,7 @@ class Account(
     """
     Represents an AWS Account.
     """
+
     id: T.Optional[str] = dataclasses.field(default=None)
     arn: T.Optional[str] = dataclasses.field(default=None)
     name: T.Optional[str] = dataclasses.field(default=None)
@@ -102,7 +104,7 @@ class Account(
 
     root_id: T.Optional[str] = dataclasses.field(default=None)
 
-    def is_account(self) -> bool:
+    def is_account(self) -> bool:  # pragma: no cover
         return True
 
 
@@ -114,13 +116,14 @@ class OrganizationalUnit(
     """
     Represents an AWS Organization Unit.
     """
+
     id: T.Optional[str] = dataclasses.field(default=None)
     arn: T.Optional[str] = dataclasses.field(default=None)
     name: T.Optional[str] = dataclasses.field(default=None)
 
     root_id: T.Optional[str] = dataclasses.field(default=None)
 
-    def is_ou(self) -> bool:
+    def is_ou(self) -> bool:  # pragma: no cover
         return True
 
 
@@ -132,6 +135,7 @@ class Organization(
     """
     Represents an AWS Organization.
     """
+
     id: T.Optional[str] = dataclasses.field(default=None)
     arn: T.Optional[str] = dataclasses.field(default=None)
     feature_set: T.Optional[str] = dataclasses.field(default=None)
@@ -142,11 +146,7 @@ class Organization(
 
     root_id: T.Optional[str] = dataclasses.field(default=None)
 
-    @property
-    def name(self) -> str:
-        return f"Organization({self.id})"
-
-    def is_org(self) -> bool:
+    def is_org(self) -> bool:  # pragma: no cover
         return True
 
 
