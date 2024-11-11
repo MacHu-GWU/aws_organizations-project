@@ -1,7 +1,19 @@
 # -*- coding: utf-8 -*-
 
 """
-Organizational Structure objective oriented interface.
+AWS Organizations structure management and traversal interface.
+
+This module provides an object-oriented interface for working with AWS Organizations,
+offering tree-based traversal, visualization, and relationship testing capabilities.
+It serves as the main entry point for the aws_organizations package.
+
+Key Features:
+
+- Tree-based representation of AWS Organization structure
+- Visualization in ASCII, CSV, and Mermaid diagram formats
+- Account and OU traversal with recursive options
+- Parent-child relationship testing
+- Serialization and deserialization support
 
 Ref:
 
@@ -14,8 +26,9 @@ import dataclasses
 
 from iterproxy import IterProxy
 from anytree import NodeMixin, RenderTree
+from anytree.exporter import MermaidExporter
 
-from .better_boto import (
+from .better_boto.api import (
     Account,
     OrganizationalUnit,
     Organization,
@@ -30,10 +43,14 @@ from .better_boto import (
 if T.TYPE_CHECKING:  # pragma: no cover
     from boto_session_manager import BotoSesManager
 
-ROOT_NODE_NAME = "root"
+ROOT_NODE_NAME = "root"  # Default name for the root node
 
 
 class NodeTypeEnum(str, enum.Enum):
+    """
+    Valid node types in the organization tree structure.
+    """
+
     ROOT = "Root"
     ORG_UNIT = "OrgUnit"
     ACCOUNT = "Account"
@@ -41,7 +58,10 @@ class NodeTypeEnum(str, enum.Enum):
 
 class Node(NodeMixin):
     """
-    A node on the organization structure Tree.
+    Represents a node in the AWS Organization tree structure.
+
+    This class extends anytree.NodeMixin to provide tree functionality. Each node
+    represents either an Organization (root), OrganizationalUnit, or Account.
 
     :param id: the id of the object on the node
     :param name: human friendly name, the name of the object on the node
@@ -74,16 +94,19 @@ class Node(NodeMixin):
 
     @property
     def parent_id(self) -> T.Optional[str]:
+        """Get parent node's ID if parent exists."""
         if self.parent is None:
             return None
         else:
             return self.parent.id
 
     def __repr__(self) -> str:
+        """User-friendly string representation showing name, type and ID."""
         return f"{self.name} ({self.type} {self.id!r})"
 
     @property
     def path_key(self) -> str:
+        """Get parent node's ID if parent exists."""
         return " | ".join([node.name for node in self.path])
 
     def _iter_accounts(self, recursive: bool = True) -> T.Iterable[Account]:
@@ -100,6 +123,7 @@ class Node(NodeMixin):
                     yield node.obj
 
     def iter_accounts(self, recursive: bool = True) -> AccountIterproxy:
+        """Get iterator for account nodes with optional recursion."""
         return AccountIterproxy(self._iter_accounts(recursive=recursive))
 
     def _iter_org_units(self, recursive: bool = True) -> T.Iterable[Account]:
@@ -116,38 +140,47 @@ class Node(NodeMixin):
                     yield node.obj
 
     def iter_org_units(self, recursive: bool = True) -> OrganizationUnitIterproxy:
+        """Get iterator for OU nodes with optional recursion."""
         return OrganizationUnitIterproxy(self._iter_org_units(recursive=recursive))
 
     @property
     def accounts(self) -> T.List[Account]:
+        """List of direct child accounts."""
         return self.iter_accounts(recursive=False).all()
 
     @property
     def org_units(self) -> T.List[OrganizationalUnit]:
+        """List of direct child OUs."""
         return self.iter_org_units(recursive=False).all()
 
     @property
     def all_accounts(self) -> T.List[Account]:
+        """List of all descendant accounts."""
         return self.iter_accounts(recursive=True).all()
 
     @property
     def all_org_units(self) -> T.List[OrganizationalUnit]:
+        """List of all descendant OUs."""
         return self.iter_org_units(recursive=True).all()
 
     @property
     def accounts_names(self) -> T.List[str]:
+        """List of direct child account names."""
         return [account.name for account in self.accounts]
 
     @property
     def org_units_names(self) -> T.List[str]:
+        """List of direct child OU names."""
         return [ou.name for ou in self.org_units]
 
     @property
     def all_accounts_names(self) -> T.List[str]:
+        """List of all descendant account names."""
         return [account.name for account in self.all_accounts]
 
     @property
     def all_org_units_names(self) -> T.List[str]:
+        """List of all descendant OU names."""
         return [ou.name for ou in self.all_org_units]
 
 
@@ -214,6 +247,7 @@ class OrgStructure:
 
     @property
     def root_id(self) -> str:
+        """Get the organization's root ID."""
         return self.root.obj.root_id
 
     def visualize(self) -> str:
@@ -223,31 +257,68 @@ class OrgStructure:
         """
         return str(RenderTree(self.root))
 
-    def to_csv(self, sep="\t") -> str:
-        """ """
-        rows = [("Type", "Path", "Id", "ParentId", "RootId")]
+    def to_csv_data(self) -> T.Tuple[T.List[str], T.List[T.List[str]]]:
+        """
+        Generate CSV data representation.
+        """
+        headers = ["Type", "Path", "Id", "ParentId", "RootId"]
+        rows = []
         node: Node
         for pre, fill, node in RenderTree(self.root):
             rows.append(
-                (
+                [
                     node.type,
                     node.path_key,
                     node.id,
                     str(node.parent_id),
                     node.obj.root_id,
-                )
+                ]
             )
+        return headers, rows
+
+    def to_csv(self, sep="\t") -> str:
+        """
+        Generate CSV string representation.
+        """
+        headers, rows = self.to_csv_data()
         return "\n".join([sep.join(row) for row in rows])
+
+    def to_mermaid(self) -> str:
+        """
+        Generate Mermaid diagram representation.
+        """
+        options = [
+            "%% AWS Organization Structure Mermaid Diagram",
+            "%% paste the following content to https://mermaid.live/edit to visualize",
+            "%% Circle = Organization | Organization Unit",
+            "%% Square = AWS Account",
+        ]
+
+        def nodefunc(node):
+            if isinstance(node.obj, Account):
+                return f'["{node.name}\n({node.id})"]'
+            else:
+                return f'(("{node.name}\n({node.id})"))'
+
+        exporter = MermaidExporter(
+            self.root,
+            options=options,
+            nodefunc=nodefunc,
+        )
+
+        lines = list(exporter)
+        return "\n".join(lines)
 
     def get_node_by_id(self, id: str) -> Node:
         """
-        Get a node by id.
+        Get a node by id. For Organization Unit, it's the OU id. For Account,
+        it's the account id. (The ``Node.id`` attributes).
         """
         return self._id_to_node[id]
 
     def get_node_by_name(self, name: str) -> Node:
         """
-        Get a node by name.
+        Get a node by name (The ``Node.name`` attributes).
         """
         return self._name_to_node[name]
 
@@ -289,6 +360,9 @@ class OrgStructure:
     def get_org_structure(cls, bsm: "BotoSesManager") -> "OrgStructure":
         """
         Get the root node of the organization structure tree.
+
+        This method recursively traverses the organization structure starting
+        from the root, building a complete tree of OUs and accounts.
 
         :param bsm: the boto session manager of any AWS Account that is in
             the desired organization, doesn't have to be the management
@@ -346,6 +420,11 @@ class OrgStructure:
         return OrgStructure(root=root_node)
 
     def serialize(self) -> dict:
+        """
+        Serialize the organization structure tree to a dictionary.
+
+        You can save the dictionary to a file as a cache.
+        """
         entities: T.List[dict] = list()
         node: Node
         for pre, fill, node in RenderTree(self.root):
@@ -362,6 +441,9 @@ class OrgStructure:
 
     @classmethod
     def deserialize(cls, data: dict) -> "OrgStructure":
+        """
+        Deserialize the organization structure tree from a dictionary.
+        """
         node_mapper = {}
         type_to_object = {
             NodeTypeEnum.ACCOUNT.value: Account,

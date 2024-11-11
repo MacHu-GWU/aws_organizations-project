@@ -1,0 +1,156 @@
+{
+    "entities": [
+        {
+            "id": "o-789",
+            "name": "root",
+            "type": "Root",
+            "obj": {
+                "id": "o-789",
+                "arn": null,
+                "feature_set": null,
+                "master_account_arn": null,
+                "master_account_id": null,
+                "master_account_email": null,
+                "available_policy_types": [],
+                "root_id": "r-123"
+            },
+            "parent_id": null
+        },
+        {
+            "id": "111111111111",
+            "name": "admin",
+            "type": "Account",
+            "obj": {
+                "id": "111111111111",
+                "arn": null,
+                "name": "admin",
+                "email": null,
+                "status": null,
+                "joined_method": null,
+                "joined_timestamp": null,
+                "root_id": "r-123"
+            },
+            "parent_id": "o-789"
+        },
+        {
+            "id": "ou-111",
+            "name": "Security",
+            "type": "OrgUnit",
+            "obj": {
+                "id": "ou-111",
+                "arn": null,
+                "name": "Security",
+                "root_id": "r-123"
+            },
+            "parent_id": "o-789"
+        },
+        {
+            "id": "222222222222",
+            "name": "sec_login",
+            "type": "Account",
+            "obj": {
+                "id": "222222222222",
+                "arn": null,
+                "name": "sec_login",
+                "email": null,
+                "status": null,
+                "joined_method": null,
+                "joined_timestamp": null,
+                "root_id": "r-123"
+            },
+            "parent_id": "ou-111"
+        },
+        {
+            "id": "333333333333",
+            "name": "sec_audit",
+            "type": "Account",
+            "obj": {
+                "id": "333333333333",
+                "arn": null,
+                "name": "sec_audit",
+                "email": null,
+                "status": null,
+                "joined_method": null,
+                "joined_timestamp": null,
+                "root_id": "r-123"
+            },
+            "parent_id": "ou-111"
+        },
+        {
+            "id": "ou-222",
+            "name": "Application",
+            "type": "OrgUnit",
+            "obj": {
+                "id": "ou-222",
+                "arn": null,
+                "name": "Application",
+                "root_id": "r-123"
+            },
+            "parent_id": "o-789"
+        },
+        {
+            "id": "444444444444",
+            "name": "devops",
+            "type": "Account",
+            "obj": {
+                "id": "444444444444",
+                "arn": null,
+                "name": "devops",
+                "email": null,
+                "status": null,
+                "joined_method": null,
+                "joined_timestamp": null,
+                "root_id": "r-123"
+            },
+            "parent_id": "ou-222"
+        },
+        {
+            "id": "555555555555",
+            "name": "app-dev",
+            "type": "Account",
+            "obj": {
+                "id": "555555555555",
+                "arn": null,
+                "name": "app-dev",
+                "email": null,
+                "status": null,
+                "joined_method": null,
+                "joined_timestamp": null,
+                "root_id": "r-123"
+            },
+            "parent_id": "ou-222"
+        },
+        {
+            "id": "666666666666",
+            "name": "app-test",
+            "type": "Account",
+            "obj": {
+                "id": "666666666666",
+                "arn": null,
+                "name": "app-test",
+                "email": null,
+                "status": null,
+                "joined_method": null,
+                "joined_timestamp": null,
+                "root_id": "r-123"
+            },
+            "parent_id": "ou-222"
+        },
+        {
+            "id": "777777777777",
+            "name": "app-prod",
+            "type": "Account",
+            "obj": {
+                "id": "777777777777",
+                "arn": null,
+                "name": "app-prod",
+                "email": null,
+                "status": null,
+                "joined_method": null,
+                "joined_timestamp": null,
+                "root_id": "r-123"
+            },
+            "parent_id": "ou-222"
+        }
+    ]
+}

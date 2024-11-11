@@ -17,6 +17,9 @@ if T.TYPE_CHECKING:
 def describe_organization(
     bsm: "BotoSesManager",
 ) -> Organization:
+    """
+    Get the details of the organization.
+    """
     response = bsm.organizations_client.describe_organization()
     return Organization(
         id=response["Organization"]["Id"],

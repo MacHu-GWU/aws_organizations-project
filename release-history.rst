@@ -15,6 +15,41 @@ Backlog (TODO)
 **Miscellaneous**
 
 
+0.4.1 (2024-11-11)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+**Breaking Changes**
+
+- Rework the API and documentation.
+- Now the public APIs are:
+    - ``aws_organizations.api.ParentTypeEnum``
+    - ``aws_organizations.api.Parent``
+    - ``aws_organizations.api.ChildTypeEnum``
+    - ``aws_organizations.api.Child``
+    - ``aws_organizations.api.AccountStatusEnum``
+    - ``aws_organizations.api.AccountJoinedMethodEnum``
+    - ``aws_organizations.api.Account``
+    - ``aws_organizations.api.OrganizationalUnit``
+    - ``aws_organizations.api.Organization``
+    - ``aws_organizations.api.ParentIterproxy``
+    - ``aws_organizations.api.ChildIterproxy``
+    - ``aws_organizations.api.AccountIterproxy``
+    - ``aws_organizations.api.OrganizationUnitIterproxy``
+    - ``aws_organizations.api.list_parents``
+    - ``aws_organizations.api.list_children``
+    - ``aws_organizations.api.get_root_id``
+    - ``aws_organizations.api.list_organizational_units_for_parent``
+    - ``aws_organizations.api.list_accounts_for_parent``
+    - ``aws_organizations.api.describe_organization``
+    - ``aws_organizations.api.ROOT_NODE_NAME``
+    - ``aws_organizations.api.NodeTypeEnum``
+    - ``aws_organizations.api.Node``
+    - ``aws_organizations.api.OrgStructure``
+
+**Features and Improvements**
+
+- Add support to dump organization structure to mermaid format.
+
+
 0.3.1 (2023-03-10)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 **Features and Improvements**

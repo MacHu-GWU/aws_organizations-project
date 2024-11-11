@@ -2,6 +2,10 @@
 
 """
 Organizational unit related boto3 API enhancement.
+
+This module provides helper functions for interacting with AWS Organizations API,
+with focus on organizational units, parent-child relationships, and account management.
+Includes pagination handling and type-safe iterators.
 """
 
 import typing as T
@@ -48,6 +52,9 @@ def list_parents(
     page_size: int = 20,
     max_results: int = 1000,
 ) -> ParentIterproxy:
+    """
+    List all parents of a child entity with pagination support.
+    """
     return ParentIterproxy(
         _list_parents(
             bsm=bsm,
@@ -88,6 +95,9 @@ def list_children(
     page_size: int = 20,
     max_results: int = 1000,
 ) -> ChildIterproxy:
+    """
+    List all children of a parent entity with pagination support.
+    """
     return ChildIterproxy(
         _list_children(
             bsm=bsm,
@@ -105,6 +115,11 @@ def get_root_id(
 ) -> str:
     """
     Recursively going up to find the AWS Organizations root id.
+
+    :param bsm: Boto session manager instance
+    :param aws_account_id: AWS account ID to start traversal from
+
+    :return: Root organization ID
     """
     for parent in list_parents(bsm=bsm, child_id=aws_account_id):
         if parent.is_root():
@@ -142,6 +157,9 @@ def list_organizational_units_for_parent(
     page_size: int = 20,
     max_results: int = 1000,
 ) -> OrganizationUnitIterproxy:
+    """
+    List all organizational units under a parent with pagination support.
+    """
     return OrganizationUnitIterproxy(
         _list_organizational_units_for_parent(
             bsm=bsm,
@@ -184,6 +202,9 @@ def list_accounts_for_parent(
     page_size: int = 20,
     max_results: int = 1000,
 ) -> AccountIterproxy:
+    """
+    List all accounts under a parent with pagination support.
+    """
     return AccountIterproxy(
         _list_accounts_for_parent(
             bsm=bsm,

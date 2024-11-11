@@ -1,7 +1,5 @@
 # User Settings
-aws_organizations_venv/
 aws_organizations.egg-info/
-aws_organizations-*/
 tmp/
 
 

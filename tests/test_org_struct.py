@@ -3,7 +3,27 @@
 import os
 import pytest
 from boto_session_manager import BotoSesManager
-from aws_organizations import better_boto
+from aws_organizations.better_boto.api import (
+    ParentTypeEnum,
+    Parent,
+    ChildTypeEnum,
+    Child,
+    AccountStatusEnum,
+    AccountJoinedMethodEnum,
+    Account,
+    OrganizationalUnit,
+    Organization,
+    ParentIterproxy,
+    ChildIterproxy,
+    AccountIterproxy,
+    OrganizationUnitIterproxy,
+    list_parents,
+    list_children,
+    get_root_id,
+    list_organizational_units_for_parent,
+    list_accounts_for_parent,
+    describe_organization,
+)
 from aws_organizations.org_struct import (
     ROOT_NODE_NAME,
     NodeTypeEnum,
@@ -34,9 +54,9 @@ def _run_test_case(org_struct: OrgStructure):
     # --------------------------------------------------------------------------
     # root account
     assert len(root.accounts) == 1
-    assert root.accounts[0].name == "awshsh-root"
+    assert root.accounts[0].name == "esc-admin"
 
-    assert len(root.all_accounts) == 6
+    assert len(root.all_accounts) == 9
     assert len(root.all_org_units) == 4
 
     assert len(root.accounts) == len(root.accounts_names)
@@ -45,10 +65,10 @@ def _run_test_case(org_struct: OrgStructure):
     assert len(root.all_org_units) == len(root.all_org_units_names)
 
     # ML ou
-    ou_ml = org_struct.get_node_by_name("ml")
-    assert len(ou_ml.accounts) == 3
+    ou_ml = org_struct.get_node_by_name("app")
+    assert len(ou_ml.accounts) == 5
     assert len(ou_ml.org_units) == 0
-    assert len(ou_ml.all_accounts) == 3
+    assert len(ou_ml.all_accounts) == 5
     assert len(ou_ml.all_org_units) == 0
 
     # --------------------------------------------------------------------------
@@ -60,8 +80,8 @@ def _run_test_case(org_struct: OrgStructure):
 
     for y in [root_id, root_node, org]:
         for x_node in [
-            org_struct.get_node_by_name("infra"),
-            org_struct.get_node_by_name("awshsh-infra"),
+            org_struct.get_node_by_name("app"),
+            org_struct.get_node_by_name("esc-app-devops"),
         ]:
             assert org_struct.is_x_in_y(x_node, y) is True
             assert org_struct.is_x_in_y(x_node.id, y) is True
@@ -69,8 +89,8 @@ def _run_test_case(org_struct: OrgStructure):
 
     assert (
         org_struct.is_x_in_y(
-            org_struct.get_node_by_name("awshsh-app-dev"),
-            org_struct.get_node_by_name("ml"),
+            org_struct.get_node_by_name("app"),
+            org_struct.get_node_by_name("esc-infra"),
         )
         is False
     )
@@ -87,18 +107,18 @@ def _run_better_boto(org_struct: OrgStructure, bsm: BotoSesManager):
     # --------------------------------------------------------------------------
     # list_children
     # --------------------------------------------------------------------------
-    res = better_boto.list_children(
+    res = list_children(
         bsm=bsm,
         parent_id=org_struct.root_id,
-        child_type=better_boto.ChildTypeEnum.ORGANIZATIONAL_UNIT.value,
+        child_type=ChildTypeEnum.ORGANIZATIONAL_UNIT.value,
     ).all()
     assert len(res) == 4
 
     for child in res:
-        res_ = better_boto.list_children(
+        res_ = list_children(
             bsm=bsm,
             parent_id=child.id,
-            child_type=better_boto.ChildTypeEnum.ACCOUNT.value,
+            child_type=ChildTypeEnum.ACCOUNT.value,
         ).all()
         rprint(f"children of {child}:")
         rprint(res_)
@@ -106,7 +126,7 @@ def _run_better_boto(org_struct: OrgStructure, bsm: BotoSesManager):
     # --------------------------------------------------------------------------
     # list_organizational_units_for_parent
     # --------------------------------------------------------------------------
-    res = better_boto.list_organizational_units_for_parent(
+    res = list_organizational_units_for_parent(
         bsm=bsm,
         parent_id=org_struct.root_id,
     ).all()
@@ -116,7 +136,7 @@ def _run_better_boto(org_struct: OrgStructure, bsm: BotoSesManager):
     # ------------------------------------------------------------------------------
     # list_accounts_for_parent
     # ------------------------------------------------------------------------------
-    res = better_boto.list_accounts_for_parent(
+    res = list_accounts_for_parent(
         bsm=bsm,
         parent_id=org_struct.root_id,
     ).all()
@@ -127,7 +147,7 @@ def _run_better_boto(org_struct: OrgStructure, bsm: BotoSesManager):
 @pytest.mark.skipif(IS_CI, reason="This test is not meant to run in CI")
 def test():
     print("")
-    bsm = BotoSesManager(profile_name="awshsh_infra_us_east_1")
+    bsm = BotoSesManager(profile_name="esc_admin_us_east_1")
     org_struct = OrgStructure.get_org_structure(bsm=bsm)
     _run_test_case(org_struct)
     _run_visualize(org_struct)
