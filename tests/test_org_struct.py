@@ -56,7 +56,7 @@ def _run_test_case(org_struct: OrgStructure):
     assert len(root.accounts) == 1
     assert root.accounts[0].name == "esc-admin"
 
-    assert len(root.all_accounts) == 9
+    assert len(root.all_accounts) == 8
     assert len(root.all_org_units) == 4
 
     assert len(root.accounts) == len(root.accounts_names)
@@ -64,12 +64,12 @@ def _run_test_case(org_struct: OrgStructure):
     assert len(root.all_accounts) == len(root.all_accounts_names)
     assert len(root.all_org_units) == len(root.all_org_units_names)
 
-    # ML ou
-    ou_ml = org_struct.get_node_by_name("app")
-    assert len(ou_ml.accounts) == 5
-    assert len(ou_ml.org_units) == 0
-    assert len(ou_ml.all_accounts) == 5
-    assert len(ou_ml.all_org_units) == 0
+    # App ou
+    ou_app = org_struct.get_node_by_name("app")
+    assert len(ou_app.accounts) == 5
+    assert len(ou_app.org_units) == 0
+    assert len(ou_app.all_accounts) == 5
+    assert len(ou_app.all_org_units) == 0
 
     # --------------------------------------------------------------------------
     # is X in Y
